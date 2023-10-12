@@ -9,4 +9,4 @@ Este programa multihilado calcula el producto de matrices de la forma $A$ x $B$ 
 
 ![image](https://github.com/paprikadreamdetective/Producto-Matricial-Multihilado/assets/133156970/0dc8f844-3333-4252-a288-e22979741cbe)
 
-De esta manera los hilos trabajan de manera mas eficiente, ya que al sumar el $n_{H}$ al iterador, se pueden repartir las tareas de una manera adecuada.
+De esta manera los hilos trabajan de manera mas eficiente, ya que al sumar el $n_{H}$ al iterador, se pueden repartir las tareas de una manera adecuada e ir realizando los calculos de los renglones.
