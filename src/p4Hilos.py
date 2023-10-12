@@ -4,55 +4,35 @@ import datetime
 import logging
 import math
 import numpy as np
+import random
+
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] (%(threadName)-s) %(message)s')
 
-#matrizA = open("A.txt")
-#matrizB = open("B.txt")
-# Abre el archivo en modo lectura
+# Crear la matriz A y B (en este ejemplo se generan aleatoriamente)
+# A = np.zeros((8, 8))
+# B = np.zeros((8, 8))
 
-    #     return(self.matriz)
+A = [
+     [1, 2, 3, 4, 5, 6, 7, 8],
+     [9, 10, 1, 2, 3, 4, 5, 6],
+     [7, 8, 9, 10, 1, 2, 3, 4],
+     [5, 6, 7, 8, 9, 10, 1, 2],
+     [3, 4, 5, 6, 7, 8, 9, 10],
+     [1, 2, 3, 4, 5, 6, 7, 8],
+     [9, 10, 1, 2, 3, 4, 5, 6],
+     [7, 8, 9, 10, 1, 2, 3, 4]
+ ]
 
-     # def establecer_valor(self, nuevo_valor):
-     #    self.valor = nuevo_valor
-def crearMatriz(nombre):
-     if (nombre):
-         matriz = np.loadtxt(nombre, usecols=range(3))
-         return (matriz)
-
-
-
-matriz = crearMatriz("A.txt")
-
-
-for fila in matriz:
-    print(fila)
-
-
-
-# Definir las matrices A y B
-# A = [[1, 2, 3],
-#      [4, 5, 6],
-#      [7, 8, 9]]
-#
-# B = [[9, 8, 7],
-#      [6, 5, 4],
-#      [3, 2, 1]]
-
-A = np.zeros((11, 11))
-B = np.zeros((11, 11))
-# B = [
-#     [1, 2, 3, 4, 5, 6, 7, 8],
-#     [9, 10, 1, 2, 3, 4, 5, 6],
-#     [7, 8, 9, 10, 1, 2, 3, 4],
-#     [5, 6, 7, 8, 9, 10, 1, 2],
-#     [3, 4, 5, 6, 7, 8, 9, 10],
-#     [1, 2, 3, 4, 5, 6, 7, 8],
-#     [9, 10, 1, 2, 3, 4, 5, 6],
-#     [7, 8, 9, 10, 1, 2, 3, 4],
-#     [7, 8, 9, 10, 1, 2, 3, 4],
-#     [7, 8, 9, 10, 1, 2, 3, 4],
-#     [7, 8, 9, 10, 1, 2, 3, 4]
-# ]
+B = [
+     [1, 2, 3, 4, 5, 6, 7, 8],
+     [9, 10, 1, 2, 3, 4, 5, 6],
+     [7, 8, 9, 10, 1, 2, 3, 4],
+     [5, 6, 7, 8, 9, 10, 1, 2],
+     [3, 4, 5, 6, 7, 8, 9, 10],
+     [1, 2, 3, 4, 5, 6, 7, 8],
+     [9, 10, 1, 2, 3, 4, 5, 6],
+     [7, 8, 9, 10, 1, 2, 3, 4],
+ ]
 
 # Dimensiones de las matrices
 filas_A = len(A)
@@ -69,34 +49,48 @@ if columnas_A != filas_B:
 C = [[0 for _ in range(columnas_B)] for _ in range(filas_A)]
 
 # Número de hilos
-numero_de_hilos = 3
+numero_de_hilos = 3  # Cambiar el número de hilos aquí
+
+# Semáforo para controlar el acceso a las filas de C
 
 # Función para realizar la multiplicación de matrices en bloques de filas
 def multiplicar_filas(inicio, fin):
-    logging.info("Consultando para el id " + str(inicio) + " fin " + str(fin))
-    for i in range(inicio, fin):
-        for j in range(columnas_B):
-            for k in range(filas_B):
-                C[i][j] += A[i][k] * B[k][j]
+    #logging.info("Consultando para el id " + str(inicio) + " fin " + str(fin))
+    #aux_inicio = inicio
+    #aux_fin = fin
+
+    #if aux_fin < 11:
+    while(fin <= 8):
+        for i in range(inicio, fin):
+            for j in range(columnas_B):
+                for k in range(filas_B):
+                    C[i][j] += A[i][k] * B[k][j]
+        #logging.info("inicio " + str(aux_inicio) + " fin " + str(aux_fin))
+        logging.info("Renglon procesado: " + str(inicio))
+
+        inicio += numero_de_hilos
+        fin += numero_de_hilos
 
 # Lista para almacenar los hilos
 hilos = []
-
 # Dividir las filas para que cada hilo procese un bloque de filas
-# bloque_filas = filas_A // numero_de_hilos
-# print("Bloque: ", bloque_filas)
 bloque_filas = math.ceil(filas_A / numero_de_hilos)
-print("Bloque: ", bloque_filas)
-inicio = 0
-fin = 0
-
-# for i in range(numero_de_hilos):
-#     inicio = i * bloque_filas
-#     fin = min((i + 1) * bloque_filas, filas_A)
-#
-#     hilo = threading.Thread(target=multiplicar_filas, args=(inicio, fin))
-#     hilos.append(hilo)
-#     hilo.start()
+#inicio = 0
+# Función para que los hilos multipliquen renglones específicos
+def worker(hilo_id, inicio, fin):
+    #logging.info(f"Hilo {hilo_id} procesando filas {inicio} - {fin}")
+    multiplicar_filas(inicio, fin)
+# inicio = 0
+# fin = 0
+# Iniciar los hilos
+for i in range(numero_de_hilos):
+    #inicio = i  # Cada hilo inicia en una fila diferente
+    #fin = filas_A
+    inicio = i
+    fin = inicio + 1
+    hilo = threading.Thread(target=worker, args=(i+1, inicio, fin))
+    hilos.append(hilo)
+    hilo.start()
 
 # Esperar a que todos los hilos terminen
 for hilo in hilos:
@@ -105,3 +99,4 @@ for hilo in hilos:
 # Imprimir la matriz resultante C
 for fila in C:
     print(fila)
+
