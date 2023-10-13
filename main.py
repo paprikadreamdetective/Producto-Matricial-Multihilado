@@ -53,15 +53,19 @@ if __name__ == "__main__":
     hilo_carga_matrizA.join()
     hilo_carga_matrizB.join()
 
-    print("Matriz A: ")
+    print("\n Matriz A: ")
     for renglon in A:
         print(renglon)
     print(" ")
-    print("Matriz B: ")
+    print(" Matriz B: ")
     for renglon in B:
         print(renglon)
 
-    nH = int(input("\n Ingrese el numero de hilos: "))
+    nH = int(input("\n Ingrese el numero de hilos a usar: "))
+    if (nH < 2):
+        print("\n Programa terminado: El numero de hilos a procesar debe ser mayor o igual a 2.")
+        exit()
+
     for i in range(nH):
         inicio = i
         fin = inicio + 1
