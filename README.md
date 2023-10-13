@@ -50,3 +50,60 @@ hilo_carga_matrizA.join()
 hilo_carga_matrizB.join()
 ```
 El modulo ```numpy``` provee metodos para importar y exportar matrices desde un ```.txt``` y a un ```.txt``` respectivamente. Una vez hecho esto las matrices estaran cargadas en el programa.
+
+## 2.3. Realizar el producto matricial y repartir las tareas.
+
+Una vez importadas las matrices, se tienen que repartir los hilos que calcularan cada renglon de la matriz resultante del producto. 
+```python
+for i in range(nH):
+        inicio = i # Se define el inicio del renglon a calcular
+        fin = inicio + 1 # Se delimita el renglon a calcular
+        # Se crea el hilo, se pasan como parametros inicio y fin, saber que renglon tiene que ser calculado
+        hilo = threading.Thread(name=("Hilo-" + str(i+1)), target=asignarTarea, args=(inicio, fin)) 
+        # Se agregan los hilos a una lista para posteriormente terminarlos mediante dicha lista
+        hilos.append(hilo)
+        # Se empiezan a ejecutar los hilos
+        hilo.start()
+```
+La funcion ```productoMatricial()``` esta diseñada para realizar el producto de matrices, el bucle ```while(fin <= len(C))``` evalua esta condicion que a su vez va de la mano de los incrementos de los contadores ```inicio += nH``` y ```fin += nH``` . Se incrementan de tal forma que las tareas se reparten en los renglones correspondientes. El numero de hilos define cada cuando tiene que ejecutar su tarea el hilo.
+```python
+def productoMatricial(inicio, fin):
+    if columnas_A != filas_B:
+        print("No se pueden multiplicar las matrices. El número de columnas de A debe ser igual al número de filas de B.")
+        exit()
+    else:
+        while(fin <= len(C)):
+            for i in range(inicio, fin):
+                for j in range(columnas_B):
+                    for k in range(filas_B):
+                        C[i][j] += A[i][k] * B[k][j]
+            logging.info("Renglon procesado: " + str(inicio) + ".")
+            inicio += nH
+            fin += nH
+```
+Esta funcion sirve para invocar a la funcion de ```productoMatricial```, recibiendo los parametros que se especifican a la hora de la creacion de los hilos.
+```python
+def asignarTarea(inicio, fin):
+    productoMatricial(inicio, fin)
+```
+Por ultimo la matriz $C$ es exportada por el hilo principal en un archivo ```.txt``` mediante la siguinete funcion:
+```python
+def exportarMatriz():
+    np.savetxt('C.txt', C, fmt='%d', delimiter=' ')
+    print(" ")
+    logging.info("Matriz exportada.")
+```
+# 3. Resultado de implementacion.
+
+Para esta ejecucion del programa, las matrices $A$ y $B$ ya han sido definidas en archivos de texto, las cuales tienen una dimension de $12$x$12$ e ingresaremos un numero de 3 hilos a ejecutar:
+
+![image](https://github.com/paprikadreamdetective/Producto-Matricial-Multihilado/assets/133156970/5cf178a3-0215-410b-81df-7f6eae0663c2)
+
+Se observa que en la parte superior aparece un mensaje que nos indica el nombre del hilo y se notifica si la matriz ha sido importada.
+
+Una vez introducido el numero de hilos a ejecutar, se empieza a procesar el producto matricial (el numero de hilos tiene que ser mayor o igual a 2 de lo contrario el programa terminara su ejecucion):
+
+![image](https://github.com/paprikadreamdetective/Producto-Matricial-Multihilado/assets/133156970/9b46e97b-6d6f-4731-9beb-674e50ca5dd2)
+
+Observemos que el orden en que los hilos realizan las tareas siempre es el numero de renglon donde empiezan mas el numero de hilos que el usario introdujo, esto hace no se consuman recursos de mas, dividiendo las tareas lo mas equitativo posible.
+Por ultimo, observemos que la matriz $C$ es importada por el hilo principal, ya que el mensaje notifica que ha realizado dicha accion.
